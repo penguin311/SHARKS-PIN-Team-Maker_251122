@@ -36,11 +36,13 @@
       display: flex;
       align-items: center;
       margin: 10px 0;
+      font-size: 20px;      /* 글자크기 증가 */
     }
     label input[type="checkbox"] {
-      margin-right: 12px;
-      width: 18px;
-      height: 18px;
+      margin-right: 14px;
+      width: 24px;           /* 체크박스 넓이 */
+      height: 24px;          /* 체크박스 높이 */
+      transform: scale(1.4); /* 체크박스 스케일 조정 */
       accent-color: #0078d4;
     }
     select, button {
@@ -88,6 +90,12 @@
       .container { padding: 10px; }
       select, button { font-size: 14px; padding: 10px; }
       .team strong { font-size: 16px; }
+      label { font-size: 18px; }              /* 모바일에서 글자크기 조정 */
+      label input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        transform: scale(1.2);
+      }
     }
   </style>
 </head>
@@ -149,11 +157,11 @@
     const teamResultsDiv = document.getElementById("teamResults");
 
     const teamColors = [
-      '#E53935', // 강한 빨강
-      '#1E88E5', // 강한 파랑
-      '#43A047', // 강한 초록
-      '#FB8C00', // 강한 주황
-      '#8E24AA'  // 강한 보라
+      '#E53935',
+      '#1E88E5',
+      '#43A047',
+      '#FB8C00',
+      '#8E24AA'
     ];
 
     members.forEach((m, idx) => {
@@ -210,9 +218,10 @@
         div.className = "team";
         const color = teamColors[idx % teamColors.length];
         div.style.borderLeftColor = color;
-        div.style.backgroundColor = `${color}20`;  // 20 헥스 = 약 12% 투명
+        div.style.backgroundColor = `${color}20`;
         const sum = teamSums[idx];
-        div.innerHTML = `<strong style="color:${color}">팀 ${idx+1} · 인원: ${team.length} <br>(합계: ${sum})</strong>` +
+        const avg = (sum / team.length).toFixed(1);
+        div.innerHTML = `<strong style="color:${color}">팀 ${idx+1} · 인원: ${teamCounts[idx]} <br>(합계: ${sum})</strong>` +
           `<ul>${team.map(m => `<li>${m.name} (${m.ave})</li>`).join("")}</ul>`;
         teamResultsDiv.appendChild(div);
       });
