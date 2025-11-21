@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>SHARKS'PIN Team Maker (251122ver Enhanced Colors)</title>
+  <style>
+    :root {
+      --bg-color: #f0f4f8;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #0078d4;
+      margin-bottom: 30px;
+    }
+    .section {
+      background: var(--card-bg);
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+    label input[type="checkbox"] {
+      margin-right: 12px;
+      width: 18px;
+      height: 18px;
+      accent-color: #0078d4;
+    }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 15px;
+      background-color: #0078d4;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background-color: #005a9c;
+      transform: translateY(-2px);
+    }
+    .team {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 6px;
+      background: var(--card-bg);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+    .team strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .team ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .team ul li {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    @media (max-width: 480px) {
+      .container { padding: 10px; }
+      select, button { font-size: 14px; padding: 10px; }
+      .team strong { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SHARKS'PIN Team Maker</h1>
+
+    <div class="section">
+      <h2>① 참석자 선택</h2>
+      <div id="attendList"></div>
+    </div>
+
+    <div class="section">
+      <h2>② 팀 수 선택</h2>
+      <select id="teamCount">
+        <option value="2">2팀</option>
+        <option value="3" selected>3팀</option>
+        <option value="4">4팀</option>
+        <option value="5">5팀</option>
+      </select>
+      <button id="makeTeams">팀 만들기</button>
+    </div>
+
+    <div class="section">
+      <h2>③ 팀 결과</h2>
+      <div id="teamResults"></div>
+    </div>
+  </div>
+
+  <script>
+    const members = [
+      { name: "장욱", ave: 207 },
+      { name: "이호", ave: 196 },
+      { name: "정원진", ave: 193 },
+      { name: "서민형", ave: 189 },
+      { name: "박천명", ave: 187 },
+      { name: "김현겸", ave: 185 },
+      { name: "김병성", ave: 176 },
+      { name: "이승태", ave: 174 },
+      { name: "김윤희", ave: 174 },
+      { name: "정현우", ave: 171 },
+      { name: "김민수", ave: 170 },
+      { name: "고현진", ave: 168 },
+      { name: "유혜경", ave: 166 },
+      { name: "홍준호", ave: 164 },
+      { name: "박상아", ave: 157 },
+      { name: "백용덕", ave: 152 },
+      { name: "조우리", ave: 145 },
+      { name: "김태민", ave: 142 },
+      { name: "백홍선", ave: 138 },
+      { name: "김현호", ave: 137 },
+      { name: "김지환", ave: 131 },
+      { name: "이혜진", ave: 122 },
+    ];
+
+    const attendListDiv = document.getElementById("attendList");
+    const teamCountSelect = document.getElementById("teamCount");
+    const makeTeamsBtn = document.getElementById("makeTeams");
+    const teamResultsDiv = document.getElementById("teamResults");
+
+    const teamColors = [
+      '#E53935', // 강한 빨강
+      '#1E88E5', // 강한 파랑
+      '#43A047', // 강한 초록
+      '#FB8C00', // 강한 주황
+      '#8E24AA'  // 강한 보라
+    ];
+
+    members.forEach((m, idx) => {
+      const label = document.createElement("label");
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.value = idx;
+      chk.checked = false;
+      label.appendChild(chk);
+      label.append(` ${m.name} (에버: ${m.ave})`);
+      attendListDiv.appendChild(label);
+    });
+
+    function makeTeams(attendees, teamCount) {
+      attendees.sort((a, b) => b.ave - a.ave);
+      const teams = Array.from({ length: teamCount }, () => []);
+      const teamSums = Array.from({ length: teamCount }, () => 0);
+      const teamCounts = Array.from({ length: teamCount }, () => 0);
+
+      attendees.forEach(m => {
+        let bestTeamIndex = 0;
+        for (let i = 1; i < teamCount; i++) {
+          if (
+            teamSums[i] < teamSums[bestTeamIndex] ||
+            (teamSums[i] === teamSums[bestTeamIndex] && teamCounts[i] < teamCounts[bestTeamIndex])
+          ) {
+            bestTeamIndex = i;
+          }
+        }
+        teams[bestTeamIndex].push(m);
+        teamSums[bestTeamIndex] += m.ave;
+        teamCounts[bestTeamIndex] += 1;
+      });
+
+      return { teams, teamSums, teamCounts };
+    }
+
+    makeTeamsBtn.addEventListener("click", () => {
+      const selectedIdx = Array.from(attendListDiv.querySelectorAll("input[type=checkbox]:checked"))
+        .map(chk => parseInt(chk.value));
+      const attendees = selectedIdx.map(i => members[i]);
+      const teamCount = parseInt(teamCountSelect.value);
+
+      if (attendees.length < teamCount) {
+        alert("참석자 수가 팀 수보다 많아야 합니다.");
+        return;
+      }
+
+      const { teams, teamSums, teamCounts } = makeTeams(attendees, teamCount);
+
+      teamResultsDiv.innerHTML = "";
+      teams.forEach((team, idx) => {
+        const div = document.createElement("div");
+        div.className = "team";
+        const color = teamColors[idx % teamColors.length];
+        div.style.borderLeftColor = color;
+        div.style.backgroundColor = `${color}20`;  // 20 헥스 = 약 12% 투명
+        const sum = teamSums[idx];
+        div.innerHTML = `<strong style="color:${color}">팀 ${idx+1} · 인원: ${team.length} <br>(합계: ${sum})</strong>` +
+          `<ul>${team.map(m => `<li>${m.name} (${m.ave})</li>`).join("")}</ul>`;
+        teamResultsDiv.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>
