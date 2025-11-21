@@ -222,7 +222,7 @@
         div.style.backgroundColor = `${color}20`;
         const sum = teamSums[idx];
         const avg = (sum / team.length).toFixed(1);
-        div.innerHTML = `<strong style="color:${color}"> ${idx+1} 팀 - 인원: ${teamCounts[idx]} <br>(합계: ${sum})</strong>` +
+        div.innerHTML = `<strong style="color:${color}"> ${idx+1}팀 인원: ${teamCounts[idx]} <br>(합계: ${sum})</strong>` +
           `<ul>${team.map(m => `<li>${m.name} (${m.ave})</li>`).join("")}</ul>`;
         teamResultsDiv.appendChild(div);
       });
