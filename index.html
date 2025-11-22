@@ -9,52 +9,87 @@
       --card-bg: #ffffff;
       --text-color: #333333;
     }
+
     body {
       margin: 0;
       padding: 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      
+      background: var(--bg-color);  /* 🔹 배경 이미지 제거, 원래 색만 사용 */
       color: var(--text-color);
-      position: relative;     /* 떠다니는 요소 기준 */
-      overflow-x: hidden;
+      position: relative;
+      overflow: hidden;  /* 떠다니는 이미지가 화면 밖으로 튀어나가는 것 숨김 */
     }
 
-    /* 🔹 둥둥 떠다니는 s.png */
-    body::before {
-      content: "";
+    /* 🔹 떠다니는 공통 스타일 */
+    .floating {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 280px;  /* 떠다니는 이미지 크기 */
-      height: 280px;
+      width: 220px;
+      height: 220px;
       background: url("s.png") no-repeat center/contain;
-      opacity: 0.3;  /* 투명도 (0~1) */
+      opacity: 0.35;
       pointer-events: none;
-      transform: translate(-50%, -50%);
-      animation: float 14s ease-in-out infinite;
       z-index: 0;
     }
 
-    @keyframes float {
-      0%   { transform: translate(-50%, -50%); }
-      25%  { transform: translate(-55%, -45%); }
-      50%  { transform: translate(-50%, -40%); }
-      75%  { transform: translate(-45%, -45%); }
-      100% { transform: translate(-50%, -50%); }
+    /* 🔹 1번 이미지 경로 */
+    .floating1 {
+      top: 10%;
+      left: 5%;
+      animation: float1 18s ease-in-out infinite alternate;
+    }
+
+    /* 🔹 2번 이미지 경로 */
+    .floating2 {
+      top: 60%;
+      left: 70%;
+      animation: float2 22s ease-in-out infinite alternate;
+    }
+
+    /* 🔹 3번 이미지 경로 */
+    .floating3 {
+      top: 30%;
+      left: 40%;
+      animation: float3 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes float1 {
+      0%   { transform: translate(0, 0); }
+      25%  { transform: translate(20px, -30px); }
+      50%  { transform: translate(40px, 10px); }
+      75%  { transform: translate(10px, 30px); }
+      100% { transform: translate(-10px, 0); }
+    }
+
+    @keyframes float2 {
+      0%   { transform: translate(0, 0); }
+      25%  { transform: translate(-30px, 20px); }
+      50%  { transform: translate(-10px, -30px); }
+      75%  { transform: translate(25px, -10px); }
+      100% { transform: translate(10px, 20px); }
+    }
+
+    @keyframes float3 {
+      0%   { transform: translate(0, 0); }
+      25%  { transform: translate(15px, 25px); }
+      50%  { transform: translate(-25px, 15px); }
+      75%  { transform: translate(-15px, -20px); }
+      100% { transform: translate(10px, -10px); }
     }
 
     .container {
       max-width: 600px;
       margin: 0 auto;
       position: relative;
-      z-index: 1;   /* 컨텐츠가 떠다니는 이미지보다 위에 보이도록 */
+      z-index: 1;  /* 컨텐츠가 떠다니는 이미지 위에 보이도록 */
     }
+
     h1 {
       text-align: center;
       color: #0078d4;
       margin-bottom: 30px;
       font-size: 60px;
     }
+
     .section {
       background: var(--card-bg);
       padding: 20px;
@@ -62,6 +97,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
     label {
       display: flex;
       align-items: center;
@@ -69,6 +105,7 @@
       padding: 6px 0;
       font-size: 20px;
     }
+
     label input[type="checkbox"] {
       margin-right: 14px;
       width: 24px;
@@ -76,6 +113,7 @@
       transform: scale(1.4);
       accent-color: #0078d4;
     }
+
     select, button {
       padding: 20px 30px;
       font-size: 18px;
@@ -86,6 +124,7 @@
       border: 1px solid #ccc;
       box-sizing: border-box;
     }
+
     button {
       margin-top: 15px;
       background-color: #0078d4;
@@ -94,10 +133,12 @@
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
     }
+
     button:hover {
       background-color: #005a9c;
       transform: translateY(-2px);
     }
+
     .team {
       margin: 20px 0;
       padding: 15px;
@@ -105,20 +146,24 @@
       background: var(--card-bg);
       box-shadow: 0 1px 6px rgba(0,0,0,0.08);
     }
+
     .team strong {
       display: block;
       margin-bottom: 12px;
       font-size: 22px;
     }
+
     .team ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
+
     .team ul li {
       margin: 8px 0;
       font-size: 20px;
     }
+
     @media (max-width: 480px) {
       .container { padding: 10px; }
       select, button { font-size: 14px; padding: 10px; }
@@ -133,6 +178,11 @@
   </style>
 </head>
 <body>
+  <!-- 🔹 떠다니는 s.png 3개 -->
+  <div class="floating floating1"></div>
+  <div class="floating floating2"></div>
+  <div class="floating floating3"></div>
+
   <div class="container">
     <h1>SHARKS'PIN <br>Team Maker</h1>
 
