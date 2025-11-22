@@ -13,19 +13,47 @@
       margin: 0;
       padding: 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url("s.png") no-repeat center center fixed;
-      background-size: cover;
+      
       color: var(--text-color);
+      position: relative;     /* 떠다니는 요소 기준 */
+      overflow-x: hidden;
     }
+
+    /* 🔹 둥둥 떠다니는 s.png */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 280px;  /* 떠다니는 이미지 크기 */
+      height: 280px;
+      background: url("s.png") no-repeat center/contain;
+      opacity: 0.3;  /* 투명도 (0~1) */
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      animation: float 14s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes float {
+      0%   { transform: translate(-50%, -50%); }
+      25%  { transform: translate(-55%, -45%); }
+      50%  { transform: translate(-50%, -40%); }
+      75%  { transform: translate(-45%, -45%); }
+      100% { transform: translate(-50%, -50%); }
+    }
+
     .container {
       max-width: 600px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;   /* 컨텐츠가 떠다니는 이미지보다 위에 보이도록 */
     }
     h1 {
       text-align: center;
       color: #0078d4;
       margin-bottom: 30px;
-      font-size: 60px;  /* 여기에서 숫자를 더 크게 바꿔보세요 */
+      font-size: 60px;
     }
     .section {
       background: var(--card-bg);
@@ -34,26 +62,25 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-  label {
-  display: flex;
-  align-items: center;
-  margin: 12px 0;       /* 세로 여백을 더 크게 설정 */
-  padding: 6px 0;       /* 위/아래 여백 추가 */
-  font-size: 20px;      /* 글자 크기도 키움 */
+    label {
+      display: flex;
+      align-items: center;
+      margin: 12px 0;
+      padding: 6px 0;
+      font-size: 20px;
     }
     label input[type="checkbox"] {
       margin-right: 14px;
-      width: 24px;           /* 체크박스 넓이 */
-      height: 24px;          /* 체크박스 높이 */
-      transform: scale(1.4); /* 체크박스 스케일 조정 */
+      width: 24px;
+      height: 24px;
+      transform: scale(1.4);
       accent-color: #0078d4;
     }
     select, button {
-      
-      padding: 20px 30px;    /* 위아래 20px, 좌우 30px 패딩으로 크기 키움 */
-      font-size: 18px;        /* 버튼 텍스트 크기 키움 */
-      min-width: 200px;       /* 최소 너비 설정 */
-      height: auto;           /* 높이 자동 */
+      padding: 20px 30px;
+      font-size: 18px;
+      min-width: 200px;
+      height: auto;
       width: 100%;
       border-radius: 6px;
       border: 1px solid #ccc;
@@ -78,25 +105,25 @@
       background: var(--card-bg);
       box-shadow: 0 1px 6px rgba(0,0,0,0.08);
     }
-  .team strong {
-  display: block;
-  margin-bottom: 12px;
-  font-size: 22px;  /* 글씨 크기 증가 */
+    .team strong {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 22px;
     }
     .team ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
- .team ul li {
-  margin: 8px 0;
-  font-size: 20px;  /* 항목 글씨 크기 증가 */
-}
+    .team ul li {
+      margin: 8px 0;
+      font-size: 20px;
+    }
     @media (max-width: 480px) {
       .container { padding: 10px; }
       select, button { font-size: 14px; padding: 10px; }
       .team strong { font-size: 16px; }
-      label { font-size: 18px; }              /* 모바일에서 글자크기 조정 */
+      label { font-size: 18px; }
       label input[type="checkbox"] {
         width: 20px;
         height: 20px;
