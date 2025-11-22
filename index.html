@@ -14,13 +14,13 @@
       margin: 0;
       padding: 20px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg-color);  
+      background: var(--bg-color);  /* 배경 이미지는 제거 */
       color: var(--text-color);
       position: relative;
-      overflow: hidden;
+      overflow: hidden;  /* 화면 바깥으로 나가는 이미지 숨김 */
     }
 
-    /*떠다니는 이미지 공통 스타일 */
+    /*s.png 공통 스타일 */
     .floating {
       position: fixed;
       width: 200px;
@@ -28,51 +28,15 @@
       background: url("s.png") no-repeat center/contain;
       pointer-events: none;
       z-index: 0;
-    }
-
-    /*이미지 각각의 위치, 애니메이션 시간 */
-
-    .f1 { top: 10%; left: 5%; animation: float1 18s ease-in-out infinite alternate; }
-    .f2 { top: 20%; left: 70%; animation: float2 22s ease-in-out infinite alternate; }
-    .f3 { top: 60%; left: 10%; animation: float3 26s ease-in-out infinite alternate; }
-    .f4 { top: 70%; left: 80%; animation: float4 20s ease-in-out infinite alternate; }
-    .f5 { top: 40%; left: 50%; animation: float5 24s ease-in-out infinite alternate; }
-    .f6 { top: 5%; left: 40%; animation: float6 28s ease-in-out infinite alternate; }
-    .f7 { top: 75%; left: 30%; animation: float7 23s ease-in-out infinite alternate; }
-    .f8 { top: 45%; left: 85%; animation: float8 19s ease-in-out infinite alternate; }
-
-    /*이동 패턴 */
-
-    @keyframes float1 {
-      0%{transform:translate(0,0);} 50%{transform:translate(40px,-30px);} 100%{transform:translate(-20px,20px);}
-    }
-    @keyframes float2 {
-      0%{transform:translate(0,0);} 50%{transform:translate(-30px,40px);} 100%{transform:translate(10px,-10px);}
-    }
-    @keyframes float3 {
-      0%{transform:translate(0,0);} 50%{transform:translate(25px,-20px);} 100%{transform:translate(-15px,30px);}
-    }
-    @keyframes float4 {
-      0%{transform:translate(0,0);} 50%{transform:translate(-35px,25px);} 100%{transform:translate(20px,10px);}
-    }
-    @keyframes float5 {
-      0%{transform:translate(0,0);} 50%{transform:translate(30px,20px);} 100%{transform:translate(-10px,-25px);}
-    }
-    @keyframes float6 {
-      0%{transform:translate(0,0);} 50%{transform:translate(-20px,-35px);} 100%{transform:translate(15px,20px);}
-    }
-    @keyframes float7 {
-      0%{transform:translate(0,0);} 50%{transform:translate(40px,15px);} 100%{transform:translate(-20px,-30px);}
-    }
-    @keyframes float8 {
-      0%{transform:translate(0,0);} 50%{transform:translate(-30px,-15px);} 100%{transform:translate(15px,25px);}
+      /* top/left가 바뀔 때 부드럽게 이동 */
+      transition: top 20s linear, left 20s linear;
     }
 
     .container {
       max-width: 600px;
       margin: 0 auto;
       position: relative;
-      z-index: 1;
+      z-index: 1;  /* 떠다니는 이미지보다 위에 보이도록 */
     }
 
     h1 {
@@ -121,7 +85,7 @@
       color: #fff;
       border: none;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     button:hover {
@@ -146,25 +110,28 @@
     .team ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
 
     .team ul li {
       margin: 8px 0;
       font-size: 20px;
     }
+
+    @media (max-width: 480px) {
+      .container { padding: 10px; }
+      select, button { font-size: 14px; padding: 10px; }
+      .team strong { font-size: 16px; }
+      label { font-size: 18px; }
+      label input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        transform: scale(1.2);
+      }
+    }
   </style>
 </head>
 <body>
-
-  <!-- 떠다니는 s.png 8개 -->
-  <div class="floating f1"></div>
-  <div class="floating f2"></div>
-  <div class="floating f3"></div>
-  <div class="floating f4"></div>
-  <div class="floating f5"></div>
-  <div class="floating f6"></div>
-  <div class="floating f7"></div>
-  <div class="floating f8"></div>
 
   <div class="container">
     <h1>SHARKS'PIN <br>Team Maker</h1>
@@ -192,6 +159,47 @@
   </div>
 
   <script>
+    /* 랜덤 위치에서 계속 움직이는 s.png 10개 생성 */
+
+    const FLOATING_COUNT = 10;
+
+    function randomPosition() {
+      // 화면 기준 0~100vh, 0~100vw 사이 랜덤
+      const top = Math.random() * 100;
+      const left = Math.random() * 100;
+      return { top, left };
+    }
+
+    function moveToRandomPosition(el) {
+      const { top, left } = randomPosition();
+      el.style.top = top + 'vh';
+      el.style.left = left + 'vw';
+    }
+
+    function createFloatingImages() {
+      for (let i = 0; i < FLOATING_COUNT; i++) {
+        const el = document.createElement('div');
+        el.className = 'floating';
+        document.body.appendChild(el);
+
+        // 처음 위치
+        moveToRandomPosition(el);
+
+        // 일정 시간마다 새로운 랜덤 위치로 이동
+        const intervalTime = 15000 + Math.random() * 10000; // 15~25초 사이
+        setInterval(() => {
+          moveToRandomPosition(el);
+        }, intervalTime);
+      }
+    }
+
+    // 페이지 로드 시 떠다니는 이미지 생성
+    createFloatingImages();
+
+
+
+    /* 팀명단 */
+
     const members = [
       { name: "장욱", ave: 207 },
       { name: "이호", ave: 196 },
@@ -224,7 +232,11 @@
     const teamResultsDiv = document.getElementById("teamResults");
 
     const teamColors = [
-      '#E53935','#1E88E5','#43A047','#FB8C00','#8E24AA'
+      '#E53935',
+      '#1E88E5',
+      '#43A047',
+      '#FB8C00',
+      '#8E24AA'
     ];
 
     members.forEach((m, idx) => {
@@ -247,8 +259,10 @@
       attendees.forEach(m => {
         let bestTeamIndex = 0;
         for (let i = 1; i < teamCount; i++) {
-          if (teamSums[i] < teamSums[bestTeamIndex] ||
-              (teamSums[i] === teamSums[bestTeamIndex] && teamCounts[i] < teamCounts[bestTeamIndex])) {
+          if (
+            teamSums[i] < teamSums[bestTeamIndex] ||
+            (teamSums[i] === teamSums[bestTeamIndex] && teamCounts[i] < teamCounts[bestTeamIndex])
+          ) {
             bestTeamIndex = i;
           }
         }
@@ -274,20 +288,18 @@
       }
 
       const { teams, teamSums, teamCounts } = makeTeams(attendees, teamCount);
-      teamResultsDiv.innerHTML = "";
 
+      teamResultsDiv.innerHTML = "";
       teams.forEach((team, idx) => {
         const div = document.createElement("div");
         div.className = "team";
         const color = teamColors[idx % teamColors.length];
         div.style.borderLeftColor = color;
         div.style.backgroundColor = `${color}20`;
-
         const sum = teamSums[idx];
         div.innerHTML =
-          `<strong style="color:${color}">${idx+1}팀 인원: ${teamCounts[idx]}<br>(합계: ${sum})</strong>` +
+          `<strong style="color:${color}"> ${idx+1}팀 인원: ${teamCounts[idx]} <br>(합계: ${sum})</strong>` +
           `<ul>${team.map(m => `<li>${m.name} (${m.ave})</li>`).join("")}</ul>`;
-
         teamResultsDiv.appendChild(div);
       });
     });
