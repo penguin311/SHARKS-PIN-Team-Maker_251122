@@ -20,7 +20,7 @@
       overflow: hidden;  /* 화면 바깥으로 나가는 이미지 숨김 */
     }
 
-    /*s.png 공통 스타일 */
+    /* s.png 공통 스타일 (위치는 JS에서 관리) */
     .floating {
       position: fixed;
       width: 200px;
@@ -28,8 +28,6 @@
       background: url("s.png") no-repeat center/contain;
       pointer-events: none;
       z-index: 0;
-      /* top/left가 바뀔 때 부드럽게 이동 */
-      transition: top 10s linear, left 10s linear;
     }
 
     .container {
@@ -159,46 +157,177 @@
   </div>
 
   <script>
-    /* 랜덤 위치에서 계속 움직이는 s.png 10개 생성 */
+    /* 🔹 물리 효과로 부딪히며 튕겨나가는 s.png 20개 */
 
     const FLOATING_COUNT = 20;
+    const SIZE = 200;                  // 이미지 크기 (px)
+    const RADIUS = SIZE / 2;
+    const SPEED = 1.5;                 // 속도 (보통 정도)
+    const MAX_SPEED = 4;               // 속도 상한 (폭주 방지)
 
-    function randomPosition() {
-      // 화면 기준 0~100vh, 0~100vw 사이 랜덤
-      const top = Math.random() * 100;
-      const left = Math.random() * 100;
-      return { top, left };
+    const floaters = [];
+
+    function clampSpeed(v) {
+      const speed = Math.hypot(v.vx, v.vy);
+      if (speed > MAX_SPEED) {
+        const ratio = MAX_SPEED / speed;
+        v.vx *= ratio;
+        v.vy *= ratio;
+      }
     }
 
-    function moveToRandomPosition(el) {
-      const { top, left } = randomPosition();
-      el.style.top = top + 'vh';
-      el.style.left = left + 'vw';
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
     }
 
-    function createFloatingImages() {
+    function randomVelocity() {
+      let angle = Math.random() * Math.PI * 2;
+      let vx = Math.cos(angle) * SPEED;
+      let vy = Math.sin(angle) * SPEED;
+      return { vx, vy };
+    }
+
+    function randomNonOverlappingPosition(existing) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      let x, y;
+      let tries = 0;
+
+      while (true) {
+        x = randomRange(RADIUS, width - RADIUS);
+        y = randomRange(RADIUS, height - RADIUS);
+
+        let overlap = false;
+        for (const f of existing) {
+          const dx = f.x - x;
+          const dy = f.y - y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < SIZE) { // 두 반지름의 합 = SIZE
+            overlap = true;
+            break;
+          }
+        }
+
+        if (!overlap || tries > 100) {
+          // 100번 이상 시도해도 안 되면 그냥 배치
+          return { x, y };
+        }
+        tries++;
+      }
+    }
+
+    function createFloaters() {
       for (let i = 0; i < FLOATING_COUNT; i++) {
         const el = document.createElement('div');
         el.className = 'floating';
         document.body.appendChild(el);
 
-        // 처음 위치
-        moveToRandomPosition(el);
+        const pos = randomNonOverlappingPosition(floaters);
+        const vel = randomVelocity();
 
-        // 일정 시간마다 새로운 랜덤 위치로 이동
-        const intervalTime = 3000 + Math.random() * 3000; // 15~25초 사이
-        setInterval(() => {
-          moveToRandomPosition(el);
-        }, intervalTime);
+        const floater = {
+          el,
+          x: pos.x,
+          y: pos.y,
+          vx: vel.vx,
+          vy: vel.vy
+        };
+
+        clampSpeed(floater);
+        floaters.push(floater);
       }
     }
 
-    // 페이지 로드 시 떠다니는 이미지 생성
-    createFloatingImages();
+    function handleWallCollision(f) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      if (f.x - RADIUS <= 0 && f.vx < 0) {
+        f.vx *= -1;
+        f.x = RADIUS;
+      } else if (f.x + RADIUS >= width && f.vx > 0) {
+        f.vx *= -1;
+        f.x = width - RADIUS;
+      }
+
+      if (f.y - RADIUS <= 0 && f.vy < 0) {
+        f.vy *= -1;
+        f.y = RADIUS;
+      } else if (f.y + RADIUS >= height && f.vy > 0) {
+        f.vy *= -1;
+        f.y = height - RADIUS;
+      }
+    }
+
+    function handleFloaterCollisions() {
+      for (let i = 0; i < floaters.length; i++) {
+        for (let j = i + 1; j < floaters.length; j++) {
+          const a = floaters[i];
+          const b = floaters[j];
+
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy);
+          const minDist = SIZE; // RADIUS + RADIUS
+
+          if (dist > 0 && dist < minDist) {
+            // 단위 법선 벡터
+            const nx = dx / dist;
+            const ny = dy / dist;
+
+            // 두 중심이 겹치지 않도록 반씩 밀어내기
+            const overlap = (minDist - dist) / 2;
+            a.x -= nx * overlap;
+            a.y -= ny * overlap;
+            b.x += nx * overlap;
+            b.y += ny * overlap;
+
+            // 상대 속도
+            const dvx = a.vx - b.vx;
+            const dvy = a.vy - b.vy;
+
+            // 법선 방향으로의 상대 속도 성분
+            const relVel = dvx * nx + dvy * ny;
+
+            // 이미 서로 멀어지는 중이면 패스
+            if (relVel > 0) continue;
+
+            // 질량이 같은 탄성 충돌 공식
+            const impulse = -2 * relVel / 2; // m1 = m2 = 1
+
+            a.vx += -impulse * nx;
+            a.vy += -impulse * ny;
+            b.vx += impulse * nx;
+            b.vy += impulse * ny;
+
+            clampSpeed(a);
+            clampSpeed(b);
+          }
+        }
+      }
+    }
+
+    function updateFloaters() {
+      for (const f of floaters) {
+        f.x += f.vx;
+        f.y += f.vy;
+        handleWallCollision(f);
+        f.el.style.left = (f.x - RADIUS) + 'px';
+        f.el.style.top = (f.y - RADIUS) + 'px';
+      }
+    }
+
+    function animate() {
+      handleFloaterCollisions();
+      updateFloaters();
+      requestAnimationFrame(animate);
+    }
+
+    createFloaters();
+    animate();
 
 
-
-    /* 팀명단 */
+    /* 🔹 이하 팀 메이커 기존 스크립트 */
 
     const members = [
       { name: "장욱", ave: 207 },
